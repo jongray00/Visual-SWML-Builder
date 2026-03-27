@@ -1,0 +1,84 @@
+@import '@xyflow/react/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* React Flow customizations */
+.react-flow__node {
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+}
+
+/* Sidebar drag items */
+.sidebar-node {
+  cursor: grab;
+  user-select: none;
+  transition: background-color 0.15s, transform 0.15s;
+}
+
+.sidebar-node:active {
+  cursor: grabbing;
+}
+
+.sidebar-node:hover {
+  transform: translateX(2px);
+}
+
+/* Properties panel inputs */
+.prop-input {
+  @apply w-full px-2 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500;
+}
+
+.prop-label {
+  @apply block text-xs font-medium text-gray-300 mb-1;
+}
+
+.prop-select {
+  @apply w-full px-2 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500;
+}
+
+.prop-textarea {
+  @apply w-full px-2 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-y;
+}
+
+.prop-checkbox {
+  @apply rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

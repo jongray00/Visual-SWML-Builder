@@ -1,0 +1,143 @@
+# ============================================================================
+# Sample IVR — Virtual Phone System (SWML Call Flow)
+# ============================================================================
+# Features:   IVR menu, Sales/Support routing, voicemail, call recording
+# Deployment: Assign to a SignalWire phone number resource as the SWML handler
+# ============================================================================
+
+version: 1.0.0
+
+sections:
+
+  # ========================================================================
+  # MAIN SECTION
+  # Nodes: Handle Call -> Answer -> Record -> Set Vars -> Welcome -> Menu
+  # ========================================================================
+  main:
+
+    # --- Handle Call / Answer ---
+    - answer: {}
+
+    # --- Start Recording (background, stereo, wav) ---
+    - record_call:
+        stereo: true
+        format: wav
+
+    # --- Set Variables ---
+    # REPLACE these placeholder numbers with real E.164 phone numbers
+    - set:
+        company_name: "My Company"
+        sales_number: "+1XXXXXXXXXX"   # TODO: Replace with Sales team number
+        support_number: "+1XXXXXXXXXX" # TODO: Replace with Support team number
+
+    # --- Welcome Message (TTS) ---
+    - play:
+        url: "say:Thank you for calling ${company_name}. We're glad you reached out."
+
+    # --- IVR Menu (Gather Input — DTMF + Speech) ---
+    - label: menu
+    - prompt:
+        play: "say:Press 1 or say Sales to speak with our sales team. Press 2 or say Support to reach our support team. Press 3 or say Voicemail to leave a message."
+        max_digits: 1
+        speech_hints:
+          - "sales"
+          - "support"
+          - "voicemail"
+          - "one"
+          - "two"
+          - "three"
+        speech_language: "en-US"
+        digit_timeout: 5.0
+        initial_timeout: 5.0
+
+    # --- Conditions: Route based on prompt_value ---
+    - switch:
+        variable: prompt_value
+        case:
+          # DTMF digit routes
+          "1":
+            - transfer:
+                dest: sales
+          "2":
+            - transfer:
+                dest: support
+          "3":
+            - transfer:
+                dest: voicemail
+          # Speech recognition routes
+          "sales":
+            - transfer:
+                dest: sales
+          "one":
+            - transfer:
+                dest: sales
+          "support":
+            - transfer:
+                dest: support
+          "two":
+            - transfer:
+                dest: support
+          "voicemail":
+            - transfer:
+                dest: voicemail
+          "three":
+            - transfer:
+                dest: voicemail
+        default:
+          # --- Re-prompt Logic ---
+          # Allow 1 re-prompt; after that, fall through to voicemail
+          - play:
+              url: "say:Sorry, I didn't catch that. Let's try again."
+          - goto:
+              label: menu
+              max: 1
+          # goto max exceeded — caller sent to voicemail
+          - transfer:
+              dest: voicemail
+
+  # ========================================================================
+  # SALES SECTION
+  # Nodes: Play TTS -> Connect (20s timeout) -> Fallback to Voicemail
+  # ========================================================================
+  sales:
+    - play:
+        url: "say:Great choice. Connecting you to our sales team now. Please hold."
+    - connect:
+        to: "${sales_number}"
+        timeout: 20
+    # No answer after 20s — fall through to voicemail
+    - play:
+        url: "say:Our sales team is currently unavailable."
+    - transfer:
+        dest: voicemail
+
+  # ========================================================================
+  # SUPPORT SECTION
+  # Nodes: Play TTS -> Connect (20s timeout) -> Fallback to Voicemail
+  # ========================================================================
+  support:
+    - play:
+        url: "say:Connecting you to our support team now. Please hold."
+    - connect:
+        to: "${support_number}"
+        timeout: 20
+    # No answer after 20s — fall through to voicemail
+    - play:
+        url: "say:Our support team is currently unavailable."
+    - transfer:
+        dest: voicemail
+
+  # ========================================================================
+  # VOICEMAIL SECTION
+  # Nodes: Play TTS -> Record (beep, 60s, #) -> Confirmation -> Hangup
+  # ========================================================================
+  voicemail:
+    - play:
+        url: "say:You've reached the voicemail for ${company_name}. Please leave your name, number, and a brief message after the beep. Press pound when you're finished."
+    - record:
+        beep: true
+        max_length: 60
+        terminators: "#"
+    - play:
+        url: "say:Thank you for your message. A member of our team will get back to you shortly. Goodbye."
+    - hangup: {}
