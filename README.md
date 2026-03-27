@@ -1,6 +1,7 @@
 # Visual SWML Call Flow Builder
 
 A drag-and-drop GUI for building SignalWire SWML call flows. Create, connect, and configure SWML method nodes on a visual canvas, then export deployable SWML as YAML or JSON.
+<img width="2178" height="1034" alt="Screenshot 2026-03-27 at 11 31 59 AM" src="https://github.com/user-attachments/assets/45c041e3-9222-4832-ae8e-235753ca5b5b" />
 
 ## Quick Start
 
